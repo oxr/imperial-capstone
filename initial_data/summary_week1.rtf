@@ -1,0 +1,119 @@
+📊 Function-by-Function Summary
+Function 1 (1D / sparse peaks)
+Nature: near-zero everywhere, sharp local peaks
+Key issue: noise + very local structure
+Model choice:
+small length_scale
+careful alpha (avoid overfitting noise)
+Acquisition: UCB or EI
+
+Insight:
+
+GP must capture sharp local behaviour; uncertainty plays a big role early on.
+
+Function 2 (2D / noisy, multimodal)
+Nature: noisy + multiple local optima
+Model choice:
+higher alpha (e.g. 1e-2)
+flexible length scale
+Acquisition: EI preferred
+
+Insight:
+
+Exploration is important to avoid getting stuck in local optima.
+
+Function 3 (3D / transformed objective)
+Nature: maximise transformed (negative) objective
+Key point:
+maximise as given (no re-negation)
+Challenge: visualisation
+Solution:
+2D slices (fix one dimension)
+
+Insight:
+
+BO works identically even when all values are negative.
+
+Function 4 (4D / complex, many local optima)
+Nature: highly multimodal, expensive evaluations
+Model choice:
+moderate/high alpha
+Acquisition: EI or exploratory UCB
+Search: random candidates
+
+Insight:
+
+Strong exploration needed due to many competing optima.
+
+Function 5 (4D / unimodal)
+Nature: mostly single peak
+Model choice:
+smoother kernel (larger length scale)
+lower exploration
+Acquisition:
+EI with small xi
+or UCB with small beta
+
+Insight:
+
+Exploitation is more appropriate than broad exploration.
+
+Function 6 (5D / negative scoring system)
+Nature: all outputs negative by design
+Key point:
+maximise directly (closest to zero)
+Model choice:
+moderate noise
+Search: random candidates
+
+Insight:
+
+BO only cares about ordering, not absolute sign.
+
+Function 7 (6D / ML hyperparameters)
+Nature: moderate dimensional hyperparameter tuning
+Model choice:
+anisotropic RBF
+learned length scales per dimension
+Observation:
+some dimensions very smooth (large length scale)
+others sensitive
+Acquisition: UCB
+
+Insight:
+
+GP learns which hyperparameters matter most.
+
+Function 8 (8D / high-dimensional tuning)
+Nature: high-dimensional, complex, local maxima sufficient
+Model choice:
+anisotropic RBF
+Search:
+large random candidate set
+Acquisition: EI
+Observation:
+some dimensions effectively flat
+
+Insight:
+
+In high dimensions, BO becomes approximate; finding strong local optima is sufficient.
+
+🔑 Cross-Cutting Insights
+1. Length scale interpretation
+small → sensitive dimension
+large → smooth / less important dimension
+hitting upper bound → dimension varies weakly
+2. Noise (alpha)
+too small → overfitting
+too large → oversmoothing
+noisy problems need larger alpha
+3. UCB vs EI
+Method	Behaviour
+UCB	simple, tunable exploration
+EI	focuses on improving best value
+4. Dimensionality effect
+Dim	Strategy
+1–2	dense grid OK
+3	grid or slices
+4–6	random candidates
+7–8	large random sampling, approximate

@@ -1,0 +1,90 @@
+📌 Part 1: Submit your queries
+
+Format:
+x1-x2-...-xn (each to 6 decimal places, starting with 0)
+
+Function 1 (1D)
+
+0.82-0.77
+
+Function 2 (2D)
+
+0.78-0.94
+
+Function 3 (3D)
+
+0.375-0.416667-0.4583333
+
+Function 4 (4D)
+
+0.460348-0.439865-0.399919-0.434560
+
+Function 5 (4D)
+
+0.301974-0.854760-0.955726-0.956521
+
+Function 6 (5D)
+
+0.442313-0.368016-0.479441-0.695979-0.113930
+
+Function 7 (6D)
+
+0.00158-0.39101-0.1532-0.245729-0.376003-0.791463
+
+Function 8 (8D)
+0.252147-0.204355-0.175316-0.048325-0.899664-0.150554-0.281117-0.601399
+
+
+📌 Part 2: Reflection on your approach
+1. Main principle used to decide query points
+
+The primary strategy was Bayesian optimisation using a Gaussian Process surrogate model, combined with acquisition functions:
+
+Upper Confidence Bound (UCB) for balancing exploration and exploitation in earlier functions
+Expected Improvement (EI) for more targeted optimisation in later, higher-dimensional functions
+
+The decision rule was:
+
+Exploit regions with high predicted mean
+Explore regions with high uncertainty
+Select the next query by maximising the acquisition function
+
+In higher dimensions, I used random candidate sampling to approximate the acquisition maximisation.
+
+2. Most challenging functions and why
+
+The most challenging functions were:
+
+Function 7 (6D) and Function 8 (8D)
+
+Reasons:
+
+High dimensionality makes the search space sparse
+GP predictions become less reliable with limited data
+Acquisition optimisation becomes approximate
+Some dimensions appeared very smooth (large length scales), making it unclear how influential they are
+
+Additional helpful information would include:
+
+Prior knowledge of important hyperparameters
+Expected smoothness or noise level of the function
+Known parameter sensitivities or bounds
+3. Strategy adjustments for future rounds
+
+Based on current observations, I would:
+
+a. Adapt exploration dynamically
+Increase exploration (higher beta or xi) if uncertainty remains high
+Reduce exploration once promising regions are identified
+b. Use learned kernel insights
+Focus search on dimensions with small length scales (more sensitive)
+Treat large length-scale dimensions as less critical locally
+c. Improve candidate selection
+Increase number of random candidate points in higher dimensions
+Potentially bias sampling toward promising regions
+d. Stabilise GP fitting
+Keep reasonable bounds on length scales (avoid chasing upper bounds indefinitely)
+Tune noise parameter (alpha) based on observed variability
+🎯 Final Summary
+
+Across all functions, the approach consistently applied uncertainty-aware optimisation, adapting from structured low-dimensional exploration to approximate high-dimensional search, while using GP kernel behaviour to interpret and guide the optimisation process.
