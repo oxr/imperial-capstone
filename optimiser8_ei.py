@@ -9,12 +9,19 @@ X = np.load("initial_data/function_8/initial_inputs.npy")              # shape (
 Y = np.load("initial_data/function_8/initial_outputs.npy").squeeze()   # shape (n,)
 
 # New observed point (8D)
-x_new = np.array([0.252147, 0.204355, 0.175316, 0.048325, 0.899664, 0.150554, 0.281117, 0.601399])
-y_new = 9.7940105951019
+x_new1 = np.array([0.252147, 0.204355, 0.175316, 0.048325, 0.899664, 0.150554, 0.281117, 0.601399])
+y_new1 = 9.7940105951019
+
+x_new2 = np.array([0.102074, 0.334362, 0.093195, 0.329480, 0.952571, 0.797051, 0.364258, 0.171929])
+y_new2 = 9.7575610446754
+
 
 # Add to dataset
-X = np.append(X, [x_new], axis=0)
-Y = np.append(Y, [y_new], axis=0)
+X = np.append(X, [x_new1, x_new2], axis=0)
+Y = np.append(Y, [y_new1, y_new2], axis=0)
+
+x_new = x_new2
+y_new = y_new2
 
 
 print("X shape:", X.shape)
@@ -28,7 +35,7 @@ xi = 0.01
 # One learned length scale per dimension
 kernel = RBF(
     length_scale=np.full(8, 0.2),
-    length_scale_bounds=(1e-2, 10.0)
+    length_scale_bounds=(1e-2, 100.0)
 )
 
 gp = GaussianProcessRegressor(
@@ -103,3 +110,14 @@ print("EI value there:", ei[best_idx])
 # Predicted mean there: 9.819600321523987
 # Predicted std there: 0.15069945143138502
 # EI value there: 0.06823665523241504
+
+# ConvergenceWarning: The optimal value found for dimension 7 of parameter length_scale is close to the specified upper bound 100.0. Increasing the bound and calling fit again may find a better value.
+#   warnings.warn(
+# Learned kernel: RBF(length_scale=[0.823, 1.18, 0.495, 1.53, 3.23, 100, 0.782, 100])
+# Current best observed value: 9.7940105951019
+# Current best observed point: [0.252147 0.204355 0.175316 0.048325 0.899664 0.150554 0.281117 0.601399]
+# Next query point: [0.24605006 0.09505581 0.24639778 0.20924229 0.99884714 0.72293155
+#  0.19394302 0.89709901]
+# Predicted mean there: 9.80167743892494
+# Predicted std there: 0.09048525184254538
+# EI value there: 0.0349438141983468

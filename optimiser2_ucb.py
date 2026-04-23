@@ -13,12 +13,17 @@ X = np.load("initial_data/function_2/initial_inputs.npy")              # shape (
 Y = np.load("initial_data/function_2/initial_outputs.npy").squeeze()   # shape (n,)
 
 # New observed point
-x_new = np.array([0.780000, 0.940000])
-y_new = 0.143753233230569
+x_new1 = np.array([0.780000, 0.940000])
+x_new2 = np.array([0.640000, 0.950000])
+y_new1 = 0.143753233230569
+y_new2 = 0.2967074641263785
+
+x_new = x_new2
+y_new = y_new2
 
 # Augment dataset
-X = np.append(X, [x_new], axis=0)
-Y = np.append(Y, [y_new], axis=0)
+X = np.append(X, [x_new1, x_new2], axis=0)
+Y = np.append(Y, [y_new1, y_new2], axis=0)
 
 print("X shape:", X.shape)
 print("Y shape:", Y.shape)
@@ -134,3 +139,14 @@ plt.show()
 # at this early stage the optimiser should still reason at 
 # a coarser spatial scale rather than fit fine 
 # local variation.
+
+
+# week3 query
+# X shape: (11, 2)
+# Y shape: (11,)
+# Y min/max: -0.06562362443733738 0.6112052157614438
+# Learned kernel: Matern(length_scale=0.0734, nu=1.5)
+# Next query point: [0.8  0.91]
+# Predicted mean there: 0.38980047666988354
+# Predicted std there: 0.20190918800313687
+# UCB value there: 1.3993464166855678

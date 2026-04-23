@@ -8,12 +8,19 @@ X = np.load("initial_data/function_5/initial_inputs.npy")
 Y = np.load("initial_data/function_5/initial_outputs.npy").squeeze()
 
 # New observed point
-x_new = np.array([0.301974, 0.854760, 0.955726, 0.956521])
-y_new = 2131.370600010672
+x_new1 = np.array([0.301974, 0.854760, 0.955726, 0.956521])
+y_new1 = 2131.370600010672
+
+x_new2 =  np.array([0.092654, 0.870671, 0.640197, 0.855801])
+y_new2 = 467.59271295184953
+
+x_new = x_new2
+y_new = y_new2
+
 
 # Add to dataset
-X = np.append(X, [x_new], axis=0)
-Y = np.append(Y, [y_new], axis=0)
+X = np.append(X, [x_new1, x_new2], axis=0)
+Y = np.append(Y, [y_new1, y_new2], axis=0)
 
 print("X shape:", X.shape)
 print("Y shape:", Y.shape)
@@ -73,3 +80,13 @@ print("UCB value there:", ucb[best_idx])
 # Predicted mean there: 248.17524802715803
 # Predicted std there: 484.977335989895
 # UCB value there: 830.148051215032
+
+# X shape: (22, 4)
+# Y shape: (22,)
+# Y min/max: 0.1129397953712203 2131.370600010672
+# Learned kernel: RBF(length_scale=0.128)
+# Best observed value: 2131.370600010672
+# Next query point: [0.30130492 0.85249204 0.99857601 0.98372184]
+# Predicted mean there: 2044.0648764126063
+# Predicted std there: 160.37216291221424
+# UCB value there: 2236.5114719072635

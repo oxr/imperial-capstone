@@ -11,10 +11,11 @@ Y0 = np.load("initial_data/function_1/initial_outputs.npy").squeeze()  # shape (
 
 # Add the new observed point
 x_new = np.array([0.82, 0.77])
+x_new2 = np.array([0.42, 0.89])
 y_new = 1.3233991793992935e-40
-
-X = np.append(X0, [x_new], axis=0)
-Y = np.append(Y0, [y_new], axis=0)
+y_new2 = 9.104098992408183e-79
+X = np.append(X0, [x_new, x_new2], axis=0)
+Y = np.append(Y0, [y_new, y_new2], axis=0)
 
 print("X shape:", X.shape)
 print("Y shape:", Y.shape)
@@ -111,3 +112,12 @@ plt.show()
 # Predicted mean there: -0.0003006538968472635
 # Predicted std there: 0.0010352435745208507
 # EI value there: 1.286907298352591e-27
+
+# X shape: (12, 2)
+# Y shape: (12,)
+# Y min/max: -0.0036060626443634764 7.710875114502849e-16
+# Best observed value: 7.710875114502849e-16
+# Next query point: [0.25 0.28]
+# Predicted mean there: -0.00027559940520172896
+# Predicted std there: 0.0009952915692213653
+# EI value there: 2.5925418271448894e-29

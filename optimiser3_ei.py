@@ -8,11 +8,18 @@ from scipy.stats import norm
 X0 = np.load("initial_data/function_3/initial_inputs.npy")
 Y0 = np.load("initial_data/function_3/initial_outputs.npy").squeeze()
 
-x_new = np.array([0.375000, 0.416667, 0.458333])
-y_new = 0.026529173868188035
+x_new1 = np.array([0.375000, 0.416667, 0.458333])
+y_new1 = 0.026529173868188035
 
-X = np.append(X0, [x_new], axis=0)
-Y = np.append(Y0, [y_new], axis=0)
+x_new2 = np.array([0.416667, 0.250000, 0.500000])
+y_new2 = -0.04248359577869199
+
+x_new = x_new2
+y_new = y_new2
+
+
+X = np.append(X0, [x_new1, x_new2], axis=0)
+Y = np.append(Y0, [y_new1, y_new2], axis=0)
 
 
 
@@ -126,3 +133,14 @@ plt.show()
 # Predicted mean there: 0.0045226375235165595
 # Predicted std there: 0.053173478009149566
 # EI value there: 0.00894085158797539
+
+
+# X shape: (18, 3)
+# Y shape: (18,)
+# Y min/max: -0.3989255131463011 0.026529173868188035
+# Learned kernel: RBF(length_scale=0.209)
+# Best observed value: 0.026529173868188035
+# Next query point: [0.41666667 0.54166667 0.54166667]
+# Predicted mean there: 0.005455548498303403
+# Predicted std there: 0.044500257302222734
+# EI value there: 0.00637671306612132

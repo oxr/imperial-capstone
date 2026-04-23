@@ -10,16 +10,21 @@ X = np.load("initial_data/function_2/initial_inputs.npy")              # shape (
 Y = np.load("initial_data/function_2/initial_outputs.npy").squeeze()   # shape (n,)
 
 # New observed point
-x_new = np.array([0.780000, 0.940000])
-y_new = 0.143753233230569
+x_new1 = np.array([0.780000, 0.940000])
+x_new2= np.array([0.640000, 0.950000])
+y_new1 = 0.143753233230569
+y_new2 = 0.2967074641263785
 
 # Augment dataset
-X = np.append(X, [x_new], axis=0)
-Y = np.append(Y, [y_new], axis=0)
+X = np.append(X, [x_new1, x_new2], axis=0)
+Y = np.append(Y, [y_new1, y_new2], axis=0)
 
 print("X shape:", X.shape)
 print("Y shape:", Y.shape)
 print("Y min/max:", Y.min(), Y.max())
+
+x_new= x_new2
+y_new = y_new2
 
 # GP model
 alpha = 1e-2

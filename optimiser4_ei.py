@@ -9,12 +9,18 @@ X = np.load("initial_data/function_4/initial_inputs.npy")              # shape (
 Y = np.load("initial_data/function_4/initial_outputs.npy").squeeze()   # shape (n,)
 
 # New observed point
-x_new = np.array([0.460348, 0.439865, 0.399919, 0.434560])
-y_new = 0.42194022156229805
+x_new1 = np.array([0.460348, 0.439865, 0.399919, 0.434560])
+y_new1 = 0.42194022156229805
+
+x_new2 = np.array([0.444690, 0.438661, 0.335267, 0.439198])
+y_new2 = -0.17606848295603994
+
+x_new = x_new2
+y_new = y_new2
 
 # Add new point to dataset
-X = np.append(X, [x_new], axis=0)
-Y = np.append(Y, [y_new], axis=0)
+X = np.append(X, [x_new1, x_new2], axis=0)
+Y = np.append(Y, [y_new1, y_new2], axis=0)
 
 print("X shape:", X.shape)
 print("Y shape:", Y.shape)
@@ -85,3 +91,13 @@ print("EI value there:", ei[best_idx])
 # Predicted mean there: -0.062271532450729694
 # Predicted std there: 0.7974381177171157
 # EI value there: 0.13023850144030744
+
+# X shape: (32, 4)
+# Y shape: (32,)
+# Y min/max: -32.625660215962455 0.42194022156229805
+# Learned kernel: RBF(length_scale=0.506)
+# Best observed value: 0.42194022156229805
+# Next query point: [0.40416254 0.42363341 0.37209122 0.44038032]
+# Predicted mean there: -0.08986385980774259
+# Predicted std there: 0.5875136656707663
+# EI value there: 0.06029639885200397

@@ -9,14 +9,18 @@ X = np.load("initial_data/function_7/initial_inputs.npy")              # shape (
 Y = np.load("initial_data/function_7/initial_outputs.npy").squeeze()   # shape (n,)
 
 # New observed point (6D)
-x_new = np.array([0.001580, 0.391010, 0.153200, 0.245729, 0.376003, 0.791463])
-y_new = 1.547355474143622
+x_new1 = np.array([0.001580, 0.391010, 0.153200, 0.245729, 0.376003, 0.791463])
+y_new1 = 1.547355474143622
+
+x_new2 = np.array([0.033758, 0.343269, 0.718226, 0.127718, 0.389525, 0.914858])
+y_new2 = 1.34597161695071
 
 # Add to dataset
-X = np.append(X, [x_new], axis=0)
-Y = np.append(Y, [y_new], axis=0)
+X = np.append(X, [x_new1, x_new2], axis=0)
+Y = np.append(Y, [y_new1, y_new2], axis=0)
 
-
+x_new = x_new2
+y_new = y_new2
 
 print("X shape:", X.shape)
 print("Y shape:", Y.shape)
@@ -29,7 +33,7 @@ xi = 0.01
 # One length scale per dimension
 kernel = RBF(
     length_scale=np.full(6, 0.2),
-    length_scale_bounds=(1e-2, 10.0)
+    length_scale_bounds=(1e-2, 100.0)
 )
 
 gp = GaussianProcessRegressor(
@@ -91,3 +95,14 @@ print("UCB value there:", ucb[best_idx])
 # Predicted mean there: 1.564585396466434
 # Predicted std there: 0.11943942492019785
 # UCB value there: 1.7437445338467308
+
+# X shape: (32, 6)
+# Y shape: (32,)
+# Y min/max: 0.0027014650245082332 1.547355474143622
+# Learned kernel: RBF(length_scale=[1.04, 0.628, 1.88, 0.514, 0.228, 0.462])
+# Current best observed value: 1.547355474143622
+# Current best observed point: [0.00158  0.39101  0.1532   0.245729 0.376003 0.791463]
+# Next query point: [0.03499111 0.09268093 0.20699378 0.09028278 0.3615622  0.72927381]
+# Predicted mean there: 1.4269706729056055
+# Predicted std there: 0.185430209690389
+# UCB value there: 1.705115987441189

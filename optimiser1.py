@@ -8,10 +8,10 @@ from sklearn.gaussian_process.kernels import RBF
 X0 = np.load("initial_data/function_1/initial_inputs.npy")          # shape (n, 2)
 Y0 = np.load("initial_data/function_1/initial_outputs.npy").squeeze()  # shape (n,)
 
-X = np.append(X0, [[0.82, 0.77]], axis=0)
-Y = np.append(Y0, [1.3233991793992935e-40], axis=0)
+X = np.append(X0, [[0.82, 0.77],[0.42,0.89]], axis=0)
+Y = np.append(Y0, [1.3233991793992935e-40, 9.104098992408183e-79], axis=0)
 
-x_new = np.array([0.82, 0.77])
+x_new = np.array([0.42,0.89])
 
 
 print("X shape:", X.shape)
@@ -110,3 +110,10 @@ plt.show()
 # Predicted std there: 0.0010136627224347798
 # UCB value there: 0.0018036124840729384
 
+# X shape: (12, 2)
+# Y shape: (12,)
+# Y min/max: -0.0036060626443634764 7.710875114502849e-16
+# Next query point: [0.93 0.41]
+# Predicted mean there: -0.0002455524253998599
+# Predicted std there: 0.0009879128496163168
+# UCB value there: 0.0027181861234490904
