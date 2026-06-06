@@ -13,17 +13,34 @@ X = np.load("initial_data/function_2/initial_inputs.npy")              # shape (
 Y = np.load("initial_data/function_2/initial_outputs.npy").squeeze()   # shape (n,)
 
 # New observed point
-x_new1 = np.array([0.780000, 0.940000])
-x_new2 = np.array([0.640000, 0.950000])
 y_new1 = 0.143753233230569
 y_new2 = 0.2967074641263785
 
-x_new = x_new2
-y_new = y_new2
+x_new = [0.700000, 0.500000]
+y_new = 0.6474771495427463
 
 # Augment dataset
-X = np.append(X, [x_new1, x_new2], axis=0)
-Y = np.append(Y, [y_new1, y_new2], axis=0)
+X = np.append(X, [
+  [0.780000, 0.940000], 
+  [0.640000, 0.950000], 
+  [0.800000, 0.910000], 
+  [0.700000, 0.500000], 
+  [0.750000, 0.510000],
+  [0.690000, 0.490000],
+  [0.700000, 0.510000],
+  [0.700000, 0.480000],
+  [0.898834, 0.276177]], axis=0)
+Y = np.append(Y, [
+  0.143753233230569, 
+  0.2967074641263785,
+  -0.02892579388263639, 
+  0.6474771495427463, 
+  0.36279134091949267,
+  0.4391892686996867,
+  0.5170222929268324,
+  0.4918772545666871,
+  0.06741558706200046
+  ], axis=0)
 
 print("X shape:", X.shape)
 print("Y shape:", Y.shape)
@@ -31,11 +48,11 @@ print("Y min/max:", Y.min(), Y.max())
 
 # GP model
 alpha = 1e-2
-beta = 5.0   # exploration parameter for UCB
+beta = 1.0   # exploration parameter for UCB
 
 
 # kernel = RBF(length_scale=0.3, length_scale_bounds=(1e-2, 10.0))
-kernel = Matern(length_scale=0.125, length_scale_bounds=(0.05, 1.0), nu=1.5)
+kernel = Matern(length_scale=0.06, length_scale_bounds="fixed", nu=1.5)
 # kernel = RationalQuadratic(length_scale=0.2, alpha=1.0)
 gp = GaussianProcessRegressor(
     kernel=kernel,
@@ -48,28 +65,55 @@ gp.fit(X, Y)
 
 print("Learned kernel:", gp.kernel_)
 
-# Candidate grid
+num_candidates = 50000
+
+lower = np.array([0.62, 0.42])
+upper = np.array([0.76, 0.58])
+
+X_candidate = np.random.uniform(lower, upper, size=(num_candidates, 2))
+
+mu, std = gp.predict(X_candidate, return_std=True)
+
+beta = 0.05
+acquisition = mu + beta * std
+
+# Avoid points too close to any previous observation
+min_dist = 0.015
+too_close = np.min(
+    np.linalg.norm(X_candidate[:, None, :] - X[None, :, :], axis=2),
+    axis=1
+) < min_dist
+
+acquisition[too_close] = -np.inf
+
+best_idx = np.argmax(acquisition)
+x_next = X_candidate[best_idx]
+
+print("Best observed value:", np.max(Y))
+print("Best observed point:", X[np.argmax(Y)])
+print("Next query point:", x_next)
+print("Distance to nearest observed:", np.min(np.linalg.norm(X - x_next, axis=1)))
+print("Predicted mean there:", mu[best_idx])
+print("Predicted std there:", std[best_idx])
+print("Acquisition value there:", acquisition[best_idx])
+
+# ------------------------------------------------------------
+# Separate grid for plotting only
+# ------------------------------------------------------------
+
 grid_size = 101
 x1_vals = np.linspace(0.0, 1.0, grid_size)
 x2_vals = np.linspace(0.0, 1.0, grid_size)
 X1g, X2g = np.meshgrid(x1_vals, x2_vals)
-X_candidate = np.column_stack([X1g.ravel(), X2g.ravel()])
 
-# GP posterior
-mu, std = gp.predict(X_candidate, return_std=True)
+X_grid = np.column_stack([X1g.ravel(), X2g.ravel()])
 
-# Upper Confidence Bound
+mu, std = gp.predict(X_grid, return_std=True)
 ucb = mu + beta * std
 
-# Next query point
-best_idx = np.argmax(ucb)
-x_next = X_candidate[best_idx]
-
-print("Next query point:", x_next)
-print("Predicted mean there:", mu[best_idx])
-print("Predicted std there:", std[best_idx])
-print("UCB value there:", ucb[best_idx])
-
+MU = mu.reshape(grid_size, grid_size)
+STD = std.reshape(grid_size, grid_size)
+UCB = ucb.reshape(grid_size, grid_size)
 # Plot
 MU = mu.reshape(grid_size, grid_size)
 STD = std.reshape(grid_size, grid_size)
@@ -150,3 +194,64 @@ plt.show()
 # Predicted mean there: 0.38980047666988354
 # Predicted std there: 0.20190918800313687
 # UCB value there: 1.3993464166855678
+# override  : [0.7,0.5] to explore the empty space in the middle
+
+# X shape: (14, 2)
+# Y shape: (14,)
+# Y min/max: -0.06562362443733738 0.6474771495427463
+# Learned kernel: Matern(length_scale=0.0389, nu=1.5)
+# Next query point: [0.75 0.51]
+# Predicted mean there: 0.3765132960611757
+# Predicted std there: 0.21939082792524203
+# UCB value there: 1.4734674356873858
+
+# X shape: (15, 2)
+# Y shape: (15,)
+# Y min/max: -0.06562362443733738 0.6474771495427463
+# Learned kernel: Matern(length_scale=0.04, nu=1.5)
+# Next query point: [0.69 0.49]
+# Predicted mean there: 0.5955405827895912
+# Predicted std there: 0.1110677193247918
+# UCB value there: 0.706608302114383
+
+# X shape: (16, 2)
+# Y shape: (16,)
+# Y min/max: -0.06562362443733738 0.6474771495427463
+# Learned kernel: Matern(length_scale=0.06, nu=1.5)
+# Next query point: [0.7  0.51]
+# Predicted mean there: 0.6651499606574953
+# Predicted std there: 0.059084708055968965
+# UCB value there: 0.6769669022686892
+#  
+# X shape: (17, 2)
+# Y shape: (17,)
+# Y min/max: -0.06562362443733738 0.6474771495427463
+# Learned kernel: Matern(length_scale=0.06, nu=1.5)
+# Next query point: [0.71 0.5 ]
+# Predicted mean there: 0.6319459091522738
+# Predicted std there: 0.05149792839968087
+# UCB value there: 0.6422454948322099 """
+
+# X shape: (18, 2)
+# Y shape: (18,)
+# Y min/max: -0.06562362443733738 0.6474771495427463
+# Learned kernel: Matern(length_scale=0.06, nu=1.5)
+# Best observed value: 0.6474771495427463
+# Best observed point: [0.7 0.5]
+# Exploratory maximin point: [0.89883384 0.27617676]
+# Distance to nearest observed point: 0.27717290616219187
+# Predicted mean at exploratory point: 0.2884430590165331
+# Predicted std at exploratory point: 0.2253083460946094
+# UCB at exploratory point: 0.5137514051111425
+
+# X shape: (19, 2)
+# Y shape: (19,)
+# Y min/max: -0.06562362443733738 0.6474771495427463
+# Learned kernel: Matern(length_scale=0.06, nu=1.5)
+# Best observed value: 0.6474771495427463
+# Best observed point: [0.7 0.5]
+# Next query point: [0.71403938 0.49461569]
+# Distance to nearest observed: 0.015036449725888105
+# Predicted mean there: 0.6208908812736711
+# Predicted std there: 0.05888354861911281
+# Acquisition value there: 0.6238350587046267

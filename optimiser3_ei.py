@@ -8,23 +8,35 @@ from scipy.stats import norm
 X0 = np.load("initial_data/function_3/initial_inputs.npy")
 Y0 = np.load("initial_data/function_3/initial_outputs.npy").squeeze()
 
-x_new1 = np.array([0.375000, 0.416667, 0.458333])
-y_new1 = 0.026529173868188035
-
-x_new2 = np.array([0.416667, 0.250000, 0.500000])
-y_new2 = -0.04248359577869199
-
-x_new = x_new2
-y_new = y_new2
 
 
-X = np.append(X0, [x_new1, x_new2], axis=0)
-Y = np.append(Y0, [y_new1, y_new2], axis=0)
+x_new = [0.416667, 0.541667, 0.541667]
+y_new = -0.014143360975926783
+
+
+X = np.append(X0, [[0.375000, 0.416667, 0.458333], 
+                   [0.416667, 0.250000, 0.500000], 
+                   [0.416667, 0.541667, 0.541667],
+                   [0.541667, 0.708333, 0.583333],
+                   [0.458333, 0.791667, 0.000000],
+                   [0.750000, 0.791667, 0.000001],
+                   [0.396598, 0.652098, 0.482640],
+                   [0.396598, 0.652099, 0.482640],
+                   [0.459106, 0.600553, 0.479508]
+                   ], axis=0)
+Y = np.append(Y0, [-0.026529173868188035,  
+                   -0.04248359577869199, 
+                   -0.014143360975926783,
+                   -0.04713365704600794,
+                   -0.12011662189405359,
+                   -0.11512601211975466,
+                   -0.016146506049970505,
+                   -0.007517478976212062,
+                   -0.02189000347551078
+                   ], axis=0)
 
 
 
-X = np.append(X,[x_new], axis=0)
-Y = np.append(Y,[y_new], axis=0)
 
 print("X shape:", X.shape)
 print("Y shape:", Y.shape)
@@ -32,9 +44,8 @@ print("Y min/max:", Y.min(), Y.max())
 
 # GP model
 alpha = 1e-2
-xi = 0.01
-
-kernel = RBF(length_scale=0.2, length_scale_bounds=(1e-2, 1.0))
+xi = 0.0
+kernel = RBF(length_scale=0.18, length_scale_bounds="fixed")
 gp = GaussianProcessRegressor(
     kernel=kernel,
     alpha=alpha,
@@ -46,39 +57,37 @@ gp.fit(X, Y)
 
 print("Learned kernel:", gp.kernel_)
 
-# 3D candidate grid over [0,1]^3
-grid_size = 25
-x1_vals = np.linspace(0.0, 1.0, grid_size)
-x2_vals = np.linspace(0.0, 1.0, grid_size)
-x3_vals = np.linspace(0.0, 1.0, grid_size)
+num_candidates = 80000
 
-X1g, X2g, X3g = np.meshgrid(x1_vals, x2_vals, x3_vals, indexing="ij")
-X_candidate = np.column_stack([X1g.ravel(), X2g.ravel(), X3g.ravel()])
+lower = np.array([0.36, 0.62, 0.45])
+upper = np.array([0.43, 0.69, 0.51])
 
-# GP posterior
+X_candidate = np.random.uniform(lower, upper, size=(num_candidates, 3))
+
 mu, std = gp.predict(X_candidate, return_std=True)
 
-# Expected Improvement for maximisation
-best_y = np.max(Y)
-improvement = mu - best_y - xi
+beta = 0.03
+acquisition = mu + beta * std
 
-ei = np.zeros_like(mu)
-mask = std > 1e-12
+min_dist = 0.015
+too_close = np.min(
+    np.linalg.norm(X_candidate[:, None, :] - X[None, :, :], axis=2),
+    axis=1
+) < min_dist
 
-Z = np.zeros_like(mu)
-Z[mask] = improvement[mask] / std[mask]
+acquisition[too_close] = -np.inf
 
-ei[mask] = improvement[mask] * norm.cdf(Z[mask]) + std[mask] * norm.pdf(Z[mask])
-
-# Next query point
-best_idx = np.argmax(ei)
+best_idx = np.argmax(acquisition)
 x_next = X_candidate[best_idx]
 
-print("Best observed value:", best_y)
+print("Best observed value:", np.max(Y))
+print("Best observed point:", X[np.argmax(Y)])
 print("Next query point:", x_next)
+print("Distance to nearest observed:", np.min(np.linalg.norm(X - x_next, axis=1)))
 print("Predicted mean there:", mu[best_idx])
 print("Predicted std there:", std[best_idx])
-print("EI value there:", ei[best_idx])
+print("Acquisition value there:", acquisition[best_idx])
+
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -144,3 +153,70 @@ plt.show()
 # Predicted mean there: 0.005455548498303403
 # Predicted std there: 0.044500257302222734
 # EI value there: 0.00637671306612132
+
+# X shape: (19, 3)
+# Y shape: (19,)
+# Y min/max: -0.3989255131463011 -0.014143360975926783
+# Learned kernel: RBF(length_scale=0.215)
+# Best observed value: -0.014143360975926783
+# Next query point: [0.54166667 0.70833333 0.58333333]
+# Predicted mean there: -0.02845579013603105
+# Predicted std there: 0.05350268738704398
+# EI value there: 0.011354861071200045
+
+# X shape: (20, 3)
+# Y shape: (20,)
+# Y min/max: -0.3989255131463011 -0.014143360975926783
+# Learned kernel: RBF(length_scale=0.216)
+# Best observed value: -0.014143360975926783
+# Next query point: [0.45833333 0.79166667 0.        ]
+# Predicted mean there: -0.026189391886737808
+# Predicted std there: 0.046431312224569886
+# EI value there: 0.012726808173309874
+
+#removed accidental double points
+#added protection from choosing the same point twice
+
+# X shape: (20, 3)
+# Y shape: (20,)
+# Y min/max: -0.3989255131463011 -0.014143360975926783
+# Learned kernel: RBF(length_scale=0.187)
+# Best observed value: -0.014143360975926783
+# Next query point: [0.75       0.79166667 0.        ]
+# Predicted mean there: -0.03731347469066933
+# Predicted std there: 0.05859814219801256
+# EI value there: 0.013253126034695509
+
+# X shape: (21, 3)
+# Y shape: (21,)
+# Y min/max: -0.3989255131463011 -0.014143360975926783
+# Learned kernel: RBF(length_scale=0.18)
+# Best observed value: -0.014143360975926783
+# Next query point: [0.39659842 0.65209869 0.48264074]
+# Predicted mean there: -0.01902931527678349
+# Predicted std there: 0.0349409492259186
+# EI value there: 0.011632506955866224
+
+# X shape: (23, 3)
+# Y shape: (23,)
+# Y min/max: -0.3989255131463011 -0.007517478976212062
+# Learned kernel: RBF(length_scale=0.18)
+# Best observed value: -0.007517478976212062
+# Next query point: [0.45910558 0.60055269 0.47950757]
+# Predicted mean there: -0.00949762775052286
+# Predicted std there: 0.01598303848105826
+# EI value there: 0.005435107573753003
+
+# submitted point: [0.459106,0.600553,0.479508]
+
+# X shape: (24, 3)
+# Y shape: (24,)
+# Y min/max: -0.3989255131463011 -0.007517478976212062
+# Learned kernel: RBF(length_scale=0.18)
+# Best observed value: -0.007517478976212062
+# Best observed point: [0.396598 0.652099 0.48264 ]
+# Next query point: [0.38875838 0.62081713 0.50943854]
+# Distance to nearest observed: 0.04192987246484065
+# Predicted mean there: -0.009693886345263844
+# Predicted std there: 0.008490693003010016
+# Acquisition value there: -0.009439165555173544

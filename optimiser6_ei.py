@@ -8,44 +8,64 @@ from scipy.stats import norm
 X = np.load("initial_data/function_6/initial_inputs.npy")              # shape (n, 5)
 Y = np.load("initial_data/function_6/initial_outputs.npy").squeeze()   # shape (n,)
 
-# New observed point (6D)
-x_new1 = np.array([0.442313, 0.368016, 0.479441, 0.695979, 0.113930])
-y_new1 = -0.25949977908512906
+# Add observed points
+X = np.append(
+    X,
+    [
+        [0.442313, 0.368016, 0.479441, 0.695979, 0.113930],
+        [0.288449, 0.338695, 0.335482, 0.785115, 0.008604],
+        [0.405747, 0.345410, 0.545632, 0.852504, 0.194695],
+        [0.396553, 0.380843, 0.678443, 0.709158, 0.084207],
+        [0.322244, 0.100853, 0.781676, 0.617864, 0.047923],
+        [0.438108, 0.271559, 0.611112, 0.782106, 0.033959],
+        [0.502990, 0.325583, 0.655442, 0.730069, 0.145543],
+        [0.462430, 0.437177, 0.615402, 0.804091, 0.057163],
+    ],
+    axis=0,
+)
 
-x_new2 = np.array([0.288449, 0.338695, 0.335482, 0.785115, 0.008604])
-y_new2 = -0.5641101270576772
-
-x_new = x_new2
-y_new = y_new2
-
-# Add to dataset
-X = np.append(X, [x_new1, x_new2], axis=0)
-Y = np.append(Y, [y_new1, y_new2], axis=0)
-
+Y = np.append(
+    Y,
+    [
+        -0.25949977908512906,
+        -0.5641101270576772,
+        -0.29623880366895267,
+        -0.17467036435627814,
+        -0.7149141061772797,
+        -0.2031829226152843,
+        -0.20629375405125805,
+        -0.26991074179681634,
+    ],
+    axis=0,
+)
 
 print("X shape:", X.shape)
 print("Y shape:", Y.shape)
 print("Y min/max:", Y.min(), Y.max())
 
 # GP settings
-alpha = 1e-3
-xi = 0.01
+alpha = 1e-6
+xi = 0.0
 
-kernel = RBF(length_scale=0.25, length_scale_bounds=(1e-2, 2.0))
+kernel = RBF(length_scale=0.25, length_scale_bounds="fixed")
+
 gp = GaussianProcessRegressor(
     kernel=kernel,
     alpha=alpha,
     normalize_y=True,
-    n_restarts_optimizer=5
 )
 
 gp.fit(X, Y)
 
 print("Learned kernel:", gp.kernel_)
 
-# Random candidate points in 5D
-num_candidates = 100000
-X_candidate = np.random.uniform(0.0, 1.0, size=(num_candidates, 5))
+# Candidate points in tightened local 5D box
+num_candidates = 80000
+
+lower = np.array([0.34, 0.32, 0.62, 0.66, 0.04])
+upper = np.array([0.44, 0.43, 0.72, 0.76, 0.13])
+
+X_candidate = np.random.uniform(lower, upper, size=(num_candidates, 5))
 
 # GP posterior
 mu, std = gp.predict(X_candidate, return_std=True)
@@ -60,17 +80,34 @@ mask = std > 1e-12
 Z = np.zeros_like(mu)
 Z[mask] = improvement[mask] / std[mask]
 
-ei[mask] = improvement[mask] * norm.cdf(Z[mask]) + std[mask] * norm.pdf(Z[mask])
+ei[mask] = (
+    improvement[mask] * norm.cdf(Z[mask])
+    + std[mask] * norm.pdf(Z[mask])
+)
 
-# Next query point
+# Avoid points too close to any previous observation
+min_dist = 0.02
+
+dist_to_nearest_observed = np.min(
+    np.linalg.norm(X_candidate[:, None, :] - X[None, :, :], axis=2),
+    axis=1,
+)
+
+ei[dist_to_nearest_observed < min_dist] = -np.inf
+
+# Select next query
 best_idx = np.argmax(ei)
 x_next = X_candidate[best_idx]
 
 print("Best observed value:", best_y)
+print("Best observed point:", X[np.argmax(Y)])
 print("Next query point:", x_next)
+print("Distance from best:", np.linalg.norm(x_next - X[np.argmax(Y)]))
+print("Distance to nearest observed:", dist_to_nearest_observed[best_idx])
 print("Predicted mean there:", mu[best_idx])
 print("Predicted std there:", std[best_idx])
 print("EI value there:", ei[best_idx])
+
 
 # X shape: (20, 5)
 # Y shape: (20,)
@@ -102,3 +139,56 @@ print("EI value there:", ei[best_idx])
 # Predicted mean there: -0.33588726948447234
 # Predicted std there: 0.16650272512461106
 # EI value there: 0.031976418022587834
+
+# X shape: (24, 5)
+# Y shape: (24,)
+# Y min/max: -2.5711696316081234 -0.17467036435627814
+# Learned kernel: RBF(length_scale=0.528)
+# Best observed value: -0.17467036435627814
+# Next query point: [0.32224398 0.10085276 0.78167556 0.61786364 0.04792335]
+# Predicted mean there: -0.3759559851394625
+# Predicted std there: 0.2397209335864598
+# EI value there: 0.026655773559717932
+
+# X shape: (25, 5)
+# Y shape: (25,)
+# Y min/max: -2.5711696316081234 -0.17467036435627814
+# Learned kernel: RBF(length_scale=0.25)
+# Best observed value: -0.17467036435627814
+# Next query point: [0.43810795 0.27155935 0.611112   0.78210629 0.03395876]
+# Predicted mean there: -0.219656520638418
+# Predicted std there: 0.28148173151057904
+# EI value there: 0.09123296800543565
+
+# X shape: (26, 5)
+# Y shape: (26,)
+# Y min/max: -2.5711696316081234 -0.17467036435627814
+# Learned kernel: RBF(length_scale=0.25)
+# Best observed value: -0.17467036435627814
+# Next query point: [0.50298965 0.32558313 0.655442   0.73006947 0.14554296]
+# Predicted mean there: -0.20936639118690858
+# Predicted std there: 0.2202321835043412
+# EI value there: 0.07159999856752823
+
+# X shape: (27, 5)
+# Y shape: (27,)
+# Y min/max: -2.5711696316081234 -0.17467036435627814
+# Learned kernel: RBF(length_scale=0.25)
+# Best observed value: -0.17467036435627814
+# Next query point: [0.46243026 0.43717672 0.61540199 0.80409089 0.05716348]
+# Predicted mean there: -0.24513029365919203
+# Predicted std there: 0.2593231880867573
+# EI value there: 0.0720204650676442
+
+# X shape: (28, 5)
+# Y shape: (28,)
+# Y min/max: -2.5711696316081234 -0.17467036435627814
+# Learned kernel: RBF(length_scale=0.25)
+# Best observed value: -0.17467036435627814
+# Best observed point: [0.396553 0.380843 0.678443 0.709158 0.084207]
+# Next query point: [0.37776266 0.3309646  0.62279504 0.74415646 0.11212825]
+# Distance from best: 0.08911854702546898
+# Distance to nearest observed: 0.08911854702546898
+# Predicted mean there: -0.14227185934626196
+# Predicted std there: 0.09593664420459988
+# EI value there: 0.05663438450263041
