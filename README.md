@@ -66,6 +66,13 @@ My approach is based on Gaussian Process (GP) surrogate modelling combined with 
 
 ---
 
+## Documentation
+
+- [Dataset Datasheet](DATASHEET.md)
+- [Model Card](MODEL_CARD.md)
+
+---
+
 ### Evolution of Strategy
 
 **Initial phase (low data):**  
