@@ -19,6 +19,7 @@ X = np.append(
         [0.172077, 0.223987, 0.123393, 0.278475, 0.993589, 0.534333, 0.068548, 1.000000],
         [0.154056, 0.166203, 0.214579, 0.315368, 1.000000, 0.542319, 0.003479, 0.225366],
         [0.257780, 0.335906, 0.149056, 0.255531, 1.000000, 0.801790, 0.141197, 1.000000],
+        [0.126717, 0.161194, 0.081980, 0.257277, 0.975836, 0.412756, 0.097774, 0.983510],
     ],
     axis=0,
 )
@@ -34,6 +35,7 @@ Y = np.append(
         9.8970225910435,
         9.8320189953334,
         9.769430927277,
+        9.921342015111,   # week 10 — new best
     ],
     axis=0,
 )
@@ -79,8 +81,10 @@ print("Current best observed point:", best_x)
 
 num_candidates = 120000
 
-lower = np.array([0.12, 0.16, 0.08, 0.22, 0.95, 0.40, 0.00, 0.85])
-upper = np.array([0.22, 0.28, 0.20, 0.35, 1.00, 0.65, 0.12, 1.00])
+# New best at [0.127, 0.161, 0.082, 0.257, 0.976, 0.413, 0.098, 0.984]
+# x6 and x8 confirmed irrelevant (large length scales) — keep them wide
+lower = np.array([0.09, 0.13, 0.05, 0.21, 0.96, 0.32, 0.05, 0.88])
+upper = np.array([0.18, 0.23, 0.13, 0.31, 1.00, 0.60, 0.14, 1.00])
 
 X_candidate = np.random.uniform(lower, upper, size=(num_candidates, 8))
 
@@ -241,3 +245,10 @@ print("UCB value there:", ucb[best_idx])
 # Predicted mean there: 9.978677224426612
 # Predicted std there: 0.020190207978903207
 # UCB value there: 9.97928293066598
+# X shape: (49, 8)
+# Y shape: (49,)
+# Best observed value: 9.921342015111  (week 10 — new best)
+# Best observed point: [0.126717 0.161194 0.08198  0.257277 0.975836 0.412756 0.097774 0.98351]
+# Next query point: [0.117842, 0.144468, 0.127133, 0.285000, 0.962514, 0.333220, 0.110359, 0.994527]
+# Predicted mean there: 9.94576643
+# UCB value there: 9.946335

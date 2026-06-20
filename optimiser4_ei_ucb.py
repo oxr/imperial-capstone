@@ -28,7 +28,8 @@ X = np.append(
         [0.316603, 0.493962, 0.385730, 0.490159],
         [0.383641, 0.376630, 0.366120, 0.428964],
         [0.383642, 0.376637, 0.366121, 0.428965],
-        [0.389930, 0.404481, 0.367830, 0.410122]
+        [0.389930, 0.404481, 0.367830, 0.410122],
+        [0.390894, 0.396495, 0.361216, 0.432627],
     ],
     axis=0,
 )
@@ -43,7 +44,8 @@ Y = np.append(
         -3.0949732106943943,
         0.43954640909770193,
         0.43945330978694885,
-        0.4462220200654383
+        0.4462220200654383,
+        0.38262694732928226,  # week 10
     ],
     axis=0,
 )
@@ -54,7 +56,7 @@ print("Y min/max:", Y.min(), Y.max())
 
 # GP model
 alpha = 1e-6
-beta = 0.03   # small beta = more exploitative UCB
+beta = 0.1   # increased slightly to allow escape from local stagnation
 
 kernel = RBF(length_scale=0.25, length_scale_bounds="fixed")
 
@@ -71,8 +73,9 @@ print("Learned kernel:", gp.kernel_)
 # Candidate points in local 4D box
 num_candidates = 50000
 
-lower = np.array([0.36, 0.37, 0.35, 0.38])
-upper = np.array([0.42, 0.43, 0.39, 0.44])
+# Best at [0.38993, 0.404481, 0.36783, 0.410122] — slightly wider to escape local stagnation
+lower = np.array([0.35, 0.36, 0.33, 0.37])
+upper = np.array([0.43, 0.45, 0.41, 0.45])
 
 X_candidate = np.random.uniform(lower, upper, size=(num_candidates, 4))
 
@@ -201,3 +204,10 @@ print("Distance from best:", np.linalg.norm(x_next - X[np.argmax(Y)]))
 # Predicted std there: 0.077735181628235
 # UCB value there: 0.5050986020292221
 # Distance from best: 0.02479164961614386
+# X shape: (39, 4)
+# Y shape: (39,)
+# Best observed value: 0.4462220200654383
+# Best observed point: [0.38993  0.404481 0.36783  0.410122]
+# Next query point: [0.380393, 0.363049, 0.408871, 0.409785]
+# Predicted mean there: 0.84522989  (GP predicts significant improvement — beta=0.1)
+# UCB value there: 0.881767

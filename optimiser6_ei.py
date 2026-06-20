@@ -20,6 +20,7 @@ X = np.append(
         [0.438108, 0.271559, 0.611112, 0.782106, 0.033959],
         [0.502990, 0.325583, 0.655442, 0.730069, 0.145543],
         [0.462430, 0.437177, 0.615402, 0.804091, 0.057163],
+        [0.377763, 0.330965, 0.622795, 0.744156, 0.112128],
     ],
     axis=0,
 )
@@ -35,6 +36,7 @@ Y = np.append(
         -0.2031829226152843,
         -0.20629375405125805,
         -0.26991074179681634,
+        -0.16694757786591216,  # week 10 — new best
     ],
     axis=0,
 )
@@ -62,8 +64,9 @@ print("Learned kernel:", gp.kernel_)
 # Candidate points in tightened local 5D box
 num_candidates = 80000
 
-lower = np.array([0.34, 0.32, 0.62, 0.66, 0.04])
-upper = np.array([0.44, 0.43, 0.72, 0.76, 0.13])
+# New best at [0.378, 0.331, 0.623, 0.744, 0.112] — shift box toward it
+lower = np.array([0.34, 0.27, 0.58, 0.71, 0.07])
+upper = np.array([0.42, 0.38, 0.67, 0.78, 0.15])
 
 X_candidate = np.random.uniform(lower, upper, size=(num_candidates, 5))
 
@@ -192,3 +195,10 @@ print("EI value there:", ei[best_idx])
 # Predicted mean there: -0.14227185934626196
 # Predicted std there: 0.09593664420459988
 # EI value there: 0.05663438450263041
+# X shape: (29, 5)
+# Y shape: (29,)
+# Best observed value: -0.16694757786591216  (week 10 — new best)
+# Best observed point: [0.377763 0.330965 0.622795 0.744156 0.112128]
+# Next query point: [0.418992, 0.347828, 0.606262, 0.710744, 0.070348]
+# Predicted mean there: -0.14609612
+# EI value there: 0.037892

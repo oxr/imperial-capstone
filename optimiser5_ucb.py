@@ -16,16 +16,19 @@ X = np.append(X, [[0.301974, 0.854760, 0.955726, 0.956521],
                   [0.356337, 0.830255, 0.993780, 0.962275],
                   [0.322292, 0.869417, 1.000000, 1.000000],
                   [0.336087, 0.927681, 1.000000, 1.000000],
-                  [0.349437, 0.973910, 1.000000, 1.000000]
+                  [0.349437, 0.973910, 1.000000, 1.000000],
+                  [0.375287, 1.000000, 1.000000, 1.000000],
                   ], axis=0)
-Y = np.append(Y, [2131.370600010672, 
-                  467.59271295184953, 
+Y = np.append(Y, [2131.370600010672,
+                  467.59271295184953,
                   2784.5912711217393,
                   2511.1486924861874,
                   2406.275844120267,
                   3111.0526131448732,
                   3631.236887736192,
-                  4156.230674508436], axis=0)
+                  4156.230674508436,
+                  4518.640075460362,  # week 10 — new best, x1 rising trend
+                  ], axis=0)
 
 print("X shape:", X.shape)
 print("Y shape:", Y.shape)
@@ -51,16 +54,12 @@ print("Kernel:", gp.kernel_)
 best_x = X[np.argmax(Y)]
 best_y = np.max(Y)
 
-num_global = 10000
-num_local = 50000
-
-X_global = np.random.uniform(0.0, 1.0, size=(num_global, 4))
-
-local_scale = 0.04
-X_local = best_x + np.random.normal(0.0, local_scale, size=(num_local, 4))
-X_local = np.clip(X_local, 0.0, 1.0)
-
-X_candidate = np.vstack([X_global, X_local])
+# x1 is the only free variable now (x2=x3=x4→1). Push x1 upward.
+# Use a structured local search: vary x1 in [0.36, 0.52], pin x2/x3/x4 near 1.
+num_candidates = 60000
+lower_local = np.array([0.36, 0.97, 0.99, 0.99])
+upper_local = np.array([0.52, 1.00, 1.00, 1.00])
+X_candidate = np.random.uniform(lower_local, upper_local, size=(num_candidates, 4))
 
 # GP posterior
 mu, std = gp.predict(X_candidate, return_std=True)
@@ -182,3 +181,10 @@ print("UCB value there:", ucb[best_idx])
 # Predicted mean there: 4438.371190343015
 # Predicted std there: 130.0499480162873
 # UCB value there: 4457.878682545458
+# X shape: (29, 4)
+# Y shape: (29,)
+# Best observed value: 4518.640075460362  (week 10 — new best)
+# Best observed point: [0.375287 1.       1.       1.      ]
+# Next query point: [0.395159, 0.999737, 0.999359, 0.999566]
+# Predicted mean there: 4536.3468
+# UCB value there: 4543.8223
