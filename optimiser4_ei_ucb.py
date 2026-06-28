@@ -29,6 +29,7 @@ X = np.append(
         [0.383641, 0.376630, 0.366120, 0.428964],
         [0.383642, 0.376637, 0.366121, 0.428965],
         [0.389930, 0.404481, 0.367830, 0.410122],
+        [0.390894, 0.396495, 0.361216, 0.432627],  # week 10
         [0.380393, 0.363049, 0.408871, 0.409785]   # week 11
     ],
     axis=0,
@@ -45,6 +46,7 @@ Y = np.append(
         0.43954640909770193,
         0.43945330978694885,
         0.4462220200654383,
+        0.38262694732928226,  # week 10
         0.568628271769811      # week 11
     ],
     axis=0,
@@ -56,7 +58,7 @@ print("Y min/max:", Y.min(), Y.max())
 
 # GP model
 alpha = 1e-6
-beta = 0.03   # small beta = more exploitative UCB
+beta = 0.1   # increased slightly to allow escape from local stagnation
 
 kernel = RBF(length_scale=0.25, length_scale_bounds="fixed")
 
@@ -204,3 +206,10 @@ print("Distance from best:", np.linalg.norm(x_next - X[np.argmax(Y)]))
 # Predicted std there: 0.077735181628235
 # UCB value there: 0.5050986020292221
 # Distance from best: 0.02479164961614386
+# X shape: (39, 4)
+# Y shape: (39,)
+# Best observed value: 0.4462220200654383
+# Best observed point: [0.38993  0.404481 0.36783  0.410122]
+# Next query point: [0.380393, 0.363049, 0.408871, 0.409785]
+# Predicted mean there: 0.84522989  (GP predicts significant improvement — beta=0.1)
+# UCB value there: 0.881767

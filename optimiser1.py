@@ -21,6 +21,7 @@ X = np.append(
         [0.800000, 0.690000],
         [0.900000, 0.780000],
         [0.604331, 0.284448],
+        [0.439984, 0.459763],  # week 10
         [0.425839, 0.452617]   # week 11
     ],
     axis=0,
@@ -38,6 +39,7 @@ Y = np.append(
         -1.15195976794276e-23,
         -1.9049415182523047e-68,
         1.863144018630619e-37,
+        0.0015757648161457936,  # week 10 — new best, massive jump
         0.06442176658113204    # week 11
     ],
     axis=0,
@@ -302,3 +304,10 @@ plt.show()
 # Predicted mean there: 5.757582358995473e-05
 # Predicted std there: 0.0005371461106209221
 # Acquisition value there: 7.36902069085824e-05
+# X shape: (20, 2)
+# Y shape: (20,)
+# Best observed value: 0.0015757648161457936  (week 10 — huge jump)
+# Best observed point: [0.439984 0.459763]
+# Next query point: [0.425839, 0.452617]
+# Predicted mean there: 0.00164409
+# Predicted std there: 0.000091

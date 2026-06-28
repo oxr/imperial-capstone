@@ -1,0 +1,21 @@
+Part 2: Strategy Reflection — Week 11
+
+How have patterns in past queries influenced your latest choices?
+
+The most direct influence has been observing which dimensions actually move the needle. For Function 5, every query that pushed x3 and x4 toward 1 yielded improvement — this compounding pattern made it rational to pin those dimensions at the boundary and focus all remaining budget on x1 and x2. For Function 7, early ARD kernel fitting revealed that x3 carried a length scale an order of magnitude larger than other dimensions, signalling low relevance; subsequent queries deliberately varied x3 freely while keeping x1 near zero, where all high-value observations cluster. For Function 8, the same ARD diagnostic flagged x6 and x8 as effectively irrelevant (length scales of 20+), so the search box for those dimensions was widened to avoid wasting queries on distinctions that do not matter.
+
+Have you identified any clusters or recurring regions?
+
+Yes, clearly. For Functions 2, 3, 4, 6, 7, and 8, the high-value observations have converged into tight, identifiable regions: F2 around (0.70, 0.50); F4 in a narrow 4D band near (0.39, 0.40, 0.37, 0.41); F7 with x1 consistently near zero across all top results. These are not artefacts of the acquisition function — the GP posterior mean is highest there even when evaluated on fresh candidates far from the training points, suggesting the function itself has genuine structure in those regions. Function 5 is a different case: rather than a static cluster, there is a monotonic trajectory drifting toward the corner x2=x3=x4=1, with x1 steadily increasing from 0.30 to 0.38 across successive best observations.
+
+Which strategies have proven less effective, and how are you adjusting?
+
+Two things underperformed. First, unconstrained kernel hyperparameter fitting with limited data drove length scales to extreme values, producing either an overconfident surrogate that missed global structure or an under-smoothed one that overfitted noise. The fix was to fix length scales manually based on domain reasoning and let observations, not maximum likelihood, drive the model. Second, maintaining very tight candidate boxes too early locked the search into locally mediocre regions — this was starkest in Function 1, where 9 queries in the neighbourhood of (0.36, 0.38) returned values near 1e-5, while a single query at (0.44, 0.46) returned 0.00158, a 150x improvement. The adjustment is to periodically widen the search box or inject a maximin-distance exploratory point even in exploitation phases.
+
+In what ways do your refinements parallel clustering algorithms?
+
+The GP surrogate plays the role of a soft assignment model: each new observation updates the posterior, pulling the predicted mean toward high-value regions and reducing uncertainty nearby — analogous to how cluster centroids shift as new points are assigned. The candidate search box acts like a Voronoi cell around the current best: all proposals are drawn from a region "owned" by the best observed point. The ARD kernel is essentially doing feature selection, assigning near-zero weight to irrelevant dimensions exactly as a clustering algorithm might collapse variance along uninformative axes. And the min-distance exclusion zone around already-queried points prevents the equivalent of cluster collapse — forcing proposals to remain meaningfully distinct from existing observations.
+
+If results were plotted, what trends might appear?
+
+For F5, a scatter plot of x1 against y-value would show a clear upward trend, effectively a 1D ridge. For F7, a projection onto x1 would reveal a bimodal split: near-zero x1 associates with all values above 2.0, while higher x1 values scatter below 1.0. For F8, plotting x5 against y-value would show a threshold near x5 ≈ 0.95 below which values drop sharply. For F4, the top-20 observations would form a tight 4D cluster visually separated from a cloud of early exploratory points with strongly negative values — a reminder that the function landscape contains both a flat plateau of mediocre results and an abrupt positive peak. These groupings would directly confirm which dimensions carry predictive power and could motivate dimensionality reduction or linear embedding for the next iteration.

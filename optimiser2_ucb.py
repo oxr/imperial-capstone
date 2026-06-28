@@ -30,17 +30,19 @@ X = np.append(X, [
   [0.700000, 0.510000],
   [0.700000, 0.480000],
   [0.898834, 0.276177],
+  [0.714039, 0.494616],  # week 10
   [0.715076, 0.509660]], axis=0)  # week 11
 Y = np.append(Y, [
-  0.143753233230569, 
+  0.143753233230569,
   0.2967074641263785,
-  -0.02892579388263639, 
-  0.6474771495427463, 
+  -0.02892579388263639,
+  0.6474771495427463,
   0.36279134091949267,
   0.4391892686996867,
   0.5170222929268324,
   0.4918772545666871,
   0.06741558706200046,
+  0.5944031150987877,  # week 10
   0.5216833985499837   # week 11
   ], axis=0)
 
@@ -69,8 +71,9 @@ print("Learned kernel:", gp.kernel_)
 
 num_candidates = 50000
 
-lower = np.array([0.62, 0.42])
-upper = np.array([0.76, 0.58])
+# Best still at [0.70, 0.50] — tighten search around it
+lower = np.array([0.67, 0.46])
+upper = np.array([0.73, 0.54])
 
 X_candidate = np.random.uniform(lower, upper, size=(num_candidates, 2))
 
@@ -257,3 +260,10 @@ plt.show()
 # Predicted mean there: 0.6208908812736711
 # Predicted std there: 0.05888354861911281
 # Acquisition value there: 0.6238350587046267
+# X shape: (20, 2)
+# Y shape: (20,)
+# Best observed value: 0.6474771495427463
+# Best observed point: [0.7  0.5]
+# Next query point: [0.715076, 0.509660]
+# Predicted mean there: 0.54599837
+# Predicted std there: 0.051566
