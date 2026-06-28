@@ -20,6 +20,7 @@ X = np.append(
         [0.438108, 0.271559, 0.611112, 0.782106, 0.033959],
         [0.502990, 0.325583, 0.655442, 0.730069, 0.145543],
         [0.462430, 0.437177, 0.615402, 0.804091, 0.057163],
+        [0.418992, 0.347828, 0.606262, 0.710744, 0.070348],   # week 11
     ],
     axis=0,
 )
@@ -35,6 +36,7 @@ Y = np.append(
         -0.2031829226152843,
         -0.20629375405125805,
         -0.26991074179681634,
+        -0.1273248497587954,    # week 11
     ],
     axis=0,
 )
@@ -62,8 +64,9 @@ print("Learned kernel:", gp.kernel_)
 # Candidate points in tightened local 5D box
 num_candidates = 80000
 
-lower = np.array([0.34, 0.32, 0.62, 0.66, 0.04])
-upper = np.array([0.44, 0.43, 0.72, 0.76, 0.13])
+# recentred on new best [0.419, 0.348, 0.606, 0.711, 0.070] (week 11)
+lower = np.array([0.37, 0.30, 0.56, 0.66, 0.03])
+upper = np.array([0.47, 0.40, 0.66, 0.76, 0.12])
 
 X_candidate = np.random.uniform(lower, upper, size=(num_candidates, 5))
 

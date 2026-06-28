@@ -20,7 +20,8 @@ X = np.append(
         [0.760000, 0.770000],
         [0.800000, 0.690000],
         [0.900000, 0.780000],
-        [0.604331, 0.284448]
+        [0.604331, 0.284448],
+        [0.425839, 0.452617]   # week 11
     ],
     axis=0,
 )
@@ -36,7 +37,8 @@ Y = np.append(
         1.0276453960669432e-26,
         -1.15195976794276e-23,
         -1.9049415182523047e-68,
-        1.863144018630619e-37
+        1.863144018630619e-37,
+        0.06442176658113204    # week 11
     ],
     axis=0,
 )
@@ -70,9 +72,10 @@ print("Learned kernel:", gp.kernel_)
 
 num_candidates = 50000
 
-# Tight local box around the current best [0.36, 0.38]
-lower = np.array([0.28, 0.30])
-upper = np.array([0.44, 0.46])
+# Tight local box around the new best [0.4258, 0.4526], biased up-right
+# (huge jump 1e-5 -> 0.064 came from moving up-and-right, so keep climbing)
+lower = np.array([0.42, 0.45])
+upper = np.array([0.52, 0.55])
 
 X_candidate = np.random.uniform(lower, upper, size=(num_candidates, 2))
 
